@@ -1,1 +1,10 @@
 @import 'tailwindcss';
+
+@utility container {
+  padding-inline: 1rem;
+  margin-inline: auto;
+}
+
+body {
+  @apply bg-gray-950 text-gray-100;
+}
