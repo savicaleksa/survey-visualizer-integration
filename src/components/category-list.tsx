@@ -2,8 +2,12 @@ import { useApiData } from '../hooks/use-api-data'
 import { cn } from '../utils/cn'
 
 const CategoryList = () => {
-  const { categories, isLoading, selectedCategory, setSelectedCategory } =
-    useApiData()
+  const {
+    categoriesWithAll,
+    isLoading,
+    selectedCategory,
+    setSelectedCategory,
+  } = useApiData()
 
   return (
     <div className="py-12 m-2 rounded-lg bg-gray-900">
@@ -13,7 +17,7 @@ const CategoryList = () => {
           {isLoading ? (
             <LoadingCategoriesList />
           ) : (
-            categories.map((c) => {
+            categoriesWithAll.map((c) => {
               const isSelected = c.name === selectedCategory
               return (
                 <button

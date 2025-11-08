@@ -20,13 +20,15 @@ const NUMBER_OF_QUESTIONS = 50
 const RATE_LIMIT_INTERVAL_MS = 5000
 const RATE_LIMIT_CODE = 5
 
-const difficulties: (Difficulty | 'all')[] = ['all', 'easy', 'medium', 'hard']
+const difficulties: Difficulty[] = ['easy', 'medium', 'hard']
 
 type OpenTriviaDBContextType = {
   apiResponse: ApiResponse | null
   filteredQuestions: Question[]
   categories: Category[]
-  difficulties: (Difficulty | 'all')[]
+  categoriesWithAll: Category[]
+  difficulties: Difficulty[]
+  filteredDifficulties: { name: Difficulty; count: number; percent: number }[]
   selectedCategory: string
   setSelectedCategory: React.Dispatch<React.SetStateAction<string>>
   selectedDifficulty: string
@@ -61,33 +63,34 @@ export const ApiDataProvider = ({
   const [isLoading, setIsLoading] = useState(false)
   const categories = useMemo(() => {
     return apiResponse && apiResponse?.results.length > 0
-      ? apiResponse?.results.reduce(
-          (acc, question) => {
-            if (!acc.find((cat) => cat.name === question.category)) {
-              const currentCategoryCount = apiResponse.results.filter(
-                (q) => q.category === question.category
-              ).length
+      ? apiResponse?.results.reduce((acc, question) => {
+          if (!acc.find((cat) => cat.name === question.category)) {
+            const currentCategoryCount = apiResponse.results.filter(
+              (q) => q.category === question.category
+            ).length
 
-              acc.push({
-                name: question.category,
-                count: currentCategoryCount,
-                decodedName: question.category
-                  .replace(/&amp;/g, '&')
-                  .replace(/&#039;/g, "'"), // Decoding amps and quotes from categories
-              })
-            }
-            return acc
-          },
-          [
-            {
-              name: 'All',
-              count: apiResponse.results.length,
-              decodedName: 'All',
-            },
-          ] as Category[]
-        )
+            acc.push({
+              name: question.category,
+              count: currentCategoryCount,
+              decodedName: question.category
+                .replace(/&amp;/g, '&')
+                .replace(/&#039;/g, "'"), // Decoding amps and quotes from categories
+            })
+          }
+          return acc
+        }, [] as Category[])
       : []
   }, [apiResponse])
+  const categoriesWithAll = useMemo(() => {
+    return [
+      {
+        name: 'All',
+        count: apiResponse ? apiResponse.results.length : 0,
+        decodedName: 'All',
+      },
+      ...categories,
+    ]
+  }, [categories, apiResponse])
 
   const filteredQuestions = useMemo(() => {
     if (!apiResponse) return []
@@ -99,6 +102,25 @@ export const ApiDataProvider = ({
         question.difficulty === selectedDifficulty
       return categoryMatch && difficultyMatch
     })
+  }, [apiResponse, selectedCategory, selectedDifficulty])
+
+  const filteredDifficulties = useMemo(() => {
+    const difficultyCounts: { [key in Difficulty]: number } = {
+      easy: 0,
+      medium: 0,
+      hard: 0,
+    }
+    if (!apiResponse) return []
+    filteredQuestions.forEach((question) => {
+      difficultyCounts[question.difficulty]++
+    })
+    return difficulties.map((difficulty) => ({
+      name: difficulty,
+      count: difficultyCounts[difficulty],
+      percent: Math.round(
+        (difficultyCounts[difficulty] / filteredQuestions.length) * 100
+      ),
+    }))
   }, [apiResponse, selectedCategory, selectedDifficulty])
 
   const rateLimit = useCallback(() => {
@@ -127,7 +149,6 @@ export const ApiDataProvider = ({
           throw new Error('Rate limit exceeded')
         }
         setApiReponse(json)
-        console.log('Data fetched successfully:', json)
       } catch (error) {
         if (error instanceof Error) {
           setError(`Error fetching data from API: ${error.message}`)
@@ -159,7 +180,9 @@ export const ApiDataProvider = ({
         apiResponse,
         filteredQuestions,
         categories,
+        categoriesWithAll,
         difficulties,
+        filteredDifficulties,
         selectedCategory,
         setSelectedCategory,
         selectedDifficulty,
