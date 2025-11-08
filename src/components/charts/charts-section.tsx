@@ -14,6 +14,7 @@ const ChartsSection = () => {
     selectedCategory,
     setSelectedCategory,
     filteredDifficulties,
+    isLoading,
   } = useApiData()
   return (
     <div className="py-12 m-2 bg-gray-900 rounded-lg">
@@ -24,36 +25,39 @@ const ChartsSection = () => {
               Categories Distribution
             </h2>
             <div className="aspect-square max-w-3xl mx-auto bg-gray-800 rounded-lg">
-              <RechartsPrimitive.ResponsiveContainer width="100%" aspect={1}>
-                <RechartsPrimitive.PieChart>
-                  <RechartsPrimitive.Pie
-                    data={categories.map((d) => ({
-                      name: d.name.toUpperCase(),
-                      value: d.count,
-                      isSelected: d.name === selectedCategory,
-                    }))}
-                    dataKey="value"
-                    nameKey="name"
-                    outerRadius="80%"
-                    innerRadius="30%"
-                  >
-                    {categories.map((d) => (
-                      <RechartsPrimitive.Cell
-                        onClick={() => setSelectedCategory(d.name)}
-                        fill={
-                          d.name === selectedCategory ||
-                          selectedCategory === 'All'
-                            ? 'var(--color-pink-400)'
-                            : 'var(--color-gray-600)'
-                        }
-                        className={'stroke-pink-50 stroke-2 cursor-pointer'}
-                        key={d.name}
-                      />
-                    ))}
-                  </RechartsPrimitive.Pie>
-                  <RechartsPrimitive.Tooltip content={CustomTooltip} />
-                </RechartsPrimitive.PieChart>
-              </RechartsPrimitive.ResponsiveContainer>
+              {!isLoading && (
+                <RechartsPrimitive.ResponsiveContainer width="100%" aspect={1}>
+                  <RechartsPrimitive.PieChart accessibilityLayer>
+                    <RechartsPrimitive.Pie
+                      isAnimationActive={false}
+                      data={categories.map((d) => ({
+                        name: d.name.toUpperCase(),
+                        value: d.count,
+                        isSelected: d.name === selectedCategory,
+                      }))}
+                      dataKey="value"
+                      nameKey="name"
+                      outerRadius="80%"
+                      innerRadius="30%"
+                    >
+                      {categories.map((d) => (
+                        <RechartsPrimitive.Cell
+                          onClick={() => setSelectedCategory(d.name)}
+                          fill={
+                            d.name === selectedCategory ||
+                            selectedCategory === 'All'
+                              ? 'var(--color-pink-400)'
+                              : 'var(--color-gray-600)'
+                          }
+                          className={'stroke-pink-50 stroke-2 cursor-pointer'}
+                          key={d.name}
+                        />
+                      ))}
+                    </RechartsPrimitive.Pie>
+                    <RechartsPrimitive.Tooltip content={CustomTooltip} />
+                  </RechartsPrimitive.PieChart>
+                </RechartsPrimitive.ResponsiveContainer>
+              )}
             </div>
           </div>
           <div>
@@ -61,33 +65,36 @@ const ChartsSection = () => {
               Difficulty Distribution by Selected Category
             </h2>
             <div className="aspect-square max-w-3xl mx-auto bg-gray-800 rounded-lg">
-              <RechartsPrimitive.ResponsiveContainer width="100%" aspect={1}>
-                <RechartsPrimitive.PieChart>
-                  <RechartsPrimitive.Pie
-                    label={(e) => `${e.percent}%`}
-                    data={filteredDifficulties.map((d) => ({
-                      name: d.name.toUpperCase(),
-                      value: d.count,
-                      color: difficultyColors[d.name] || 'red',
-                      percent: d.percent,
-                    }))}
-                    dataKey="value"
-                    nameKey="name"
-                    outerRadius="80%"
-                    innerRadius="30%"
-                  >
-                    {filteredDifficulties.map((d) => (
-                      <RechartsPrimitive.Cell
-                        fill={difficultyColors[d.name]}
-                        className={'stroke-pink-50 stroke-2'}
-                        key={d.name}
-                      />
-                    ))}
-                  </RechartsPrimitive.Pie>
-                  <RechartsPrimitive.Legend />
-                  <RechartsPrimitive.Tooltip content={CustomTooltip} />
-                </RechartsPrimitive.PieChart>
-              </RechartsPrimitive.ResponsiveContainer>
+              {!isLoading && (
+                <RechartsPrimitive.ResponsiveContainer width="100%" aspect={1}>
+                  <RechartsPrimitive.PieChart accessibilityLayer>
+                    <RechartsPrimitive.Pie
+                      isAnimationActive={false}
+                      label={(e) => `${e.percent}%`}
+                      data={filteredDifficulties.map((d) => ({
+                        name: d.name.toUpperCase(),
+                        value: d.count,
+                        color: difficultyColors[d.name] || 'red',
+                        percent: d.percent,
+                      }))}
+                      dataKey="value"
+                      nameKey="name"
+                      outerRadius="80%"
+                      innerRadius="30%"
+                    >
+                      {filteredDifficulties.map((d) => (
+                        <RechartsPrimitive.Cell
+                          fill={difficultyColors[d.name]}
+                          className={'stroke-pink-50 stroke-2'}
+                          key={d.name}
+                        />
+                      ))}
+                    </RechartsPrimitive.Pie>
+                    <RechartsPrimitive.Legend />
+                    <RechartsPrimitive.Tooltip content={CustomTooltip} />
+                  </RechartsPrimitive.PieChart>
+                </RechartsPrimitive.ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>

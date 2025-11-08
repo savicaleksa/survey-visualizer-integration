@@ -134,6 +134,8 @@ export const ApiDataProvider = ({
     async (number_of_questions = NUMBER_OF_QUESTIONS) => {
       if (isRateLimited || !isMounted) return
       console.log('Fetching new data from API...')
+      setSelectedCategory('All')
+      setSelectedDifficulty('all')
       setError(null)
       setIsLoading(true)
 
