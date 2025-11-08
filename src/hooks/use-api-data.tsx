@@ -1,0 +1,162 @@
+import type React from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import type { ApiResponse, Difficulty, Question } from '../types/api-types'
+
+const BASE_API_URL = 'https://opentdb.com'
+const NUMBER_OF_QUESTIONS = 50
+const RATE_LIMIT_INTERVAL_MS = 5000
+const RATE_LIMIT_CODE = 5
+
+const difficulties: (Difficulty | 'all')[] = ['all', 'easy', 'medium', 'hard']
+
+type OpenTriviaDBContextType = {
+  apiResponse: ApiResponse | null
+  filteredQuestions: Question[]
+  categories: { name: string; count: number }[]
+  difficulties: (Difficulty | 'all')[]
+  selectedCategory: string
+  setSelectedCategory: React.Dispatch<React.SetStateAction<string>>
+  selectedDifficulty: string
+  setSelectedDifficulty: React.Dispatch<React.SetStateAction<string>>
+  isLoading: boolean
+  updateApiData: (number_of_questions?: number) => Promise<void>
+  error: string | null
+}
+
+const OpenTriviaDBContext = createContext<OpenTriviaDBContextType | null>(null)
+
+export const useApiData = () => {
+  const context = useContext(OpenTriviaDBContext)
+  if (!context) {
+    throw new Error('useApiData must be used within a <ApiDataProvider />')
+  }
+  return context
+}
+
+export const ApiDataProvider = ({
+  children,
+}: {
+  children: React.ReactNode
+}) => {
+  const [isMounted, setIsMounted] = useState(false)
+  const [isRateLimited, setIsRateLimited] = useState(false)
+  const [apiResponse, setApiReponse] = useState<ApiResponse | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string>('All')
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all')
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const categories = useMemo(() => {
+    return apiResponse && apiResponse?.results.length > 0
+      ? apiResponse?.results.reduce(
+          (acc, question) => {
+            if (!acc.find((cat) => cat.name === question.category)) {
+              const currentCategoryCount = apiResponse.results.filter(
+                (q) => q.category === question.category
+              ).length
+
+              acc.push({
+                name: question.category,
+                count: currentCategoryCount,
+              })
+            }
+            return acc
+          },
+          [{ name: 'All', count: apiResponse.results.length }] as {
+            name: string
+            count: number
+          }[]
+        )
+      : []
+  }, [apiResponse])
+
+  const filteredQuestions = useMemo(() => {
+    if (!apiResponse) return []
+    return apiResponse.results.filter((question) => {
+      const categoryMatch =
+        selectedCategory === 'All' || question.category === selectedCategory
+      const difficultyMatch =
+        selectedDifficulty === 'all' ||
+        question.difficulty === selectedDifficulty
+      return categoryMatch && difficultyMatch
+    })
+  }, [apiResponse, selectedCategory, selectedDifficulty])
+
+  const rateLimit = useCallback(() => {
+    setIsRateLimited(true)
+    setTimeout(() => {
+      setIsRateLimited(false)
+    }, RATE_LIMIT_INTERVAL_MS)
+  }, [])
+
+  const updateApiData = useCallback(
+    async (number_of_questions = NUMBER_OF_QUESTIONS) => {
+      if (isRateLimited || !isMounted) return
+      console.log('Fetching new data from API...')
+      setError(null)
+      setIsLoading(true)
+
+      try {
+        const data = await fetch(
+          `${BASE_API_URL}/api.php?amount=${number_of_questions}`
+        )
+
+        rateLimit()
+
+        const json = (await data.json()) as ApiResponse
+        if (json.response_code === RATE_LIMIT_CODE) {
+          throw new Error('Rate limit exceeded')
+        }
+        setApiReponse(json)
+        console.log('Data fetched successfully:', json)
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(`Error fetching data from API: ${error.message}`)
+          console.error('Error fetching data from API:', error.message)
+        } else {
+          setError('An unknown error occurred')
+          console.error('An unknown error occurred')
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [isRateLimited, isMounted, rateLimit]
+  )
+
+  useEffect(() => {
+    if (!isMounted) {
+      setIsMounted(true)
+      console.log('Component mounted...')
+    } else {
+      console.log('Initial data fetch...')
+      updateApiData()
+    }
+  }, [isMounted])
+
+  return (
+    <OpenTriviaDBContext.Provider
+      value={{
+        apiResponse,
+        filteredQuestions,
+        categories,
+        difficulties,
+        selectedCategory,
+        setSelectedCategory,
+        selectedDifficulty,
+        setSelectedDifficulty,
+        isLoading,
+        updateApiData,
+        error,
+      }}
+    >
+      {children}
+    </OpenTriviaDBContext.Provider>
+  )
+}
