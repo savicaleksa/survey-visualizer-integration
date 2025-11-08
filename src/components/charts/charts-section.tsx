@@ -19,7 +19,7 @@ const ChartsSection = () => {
   return (
     <div className="py-12 m-2 bg-gray-900 rounded-lg">
       <div className="container">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1  lg:grid-cols-2 gap-12 lg:gap-4">
           <div>
             <h2 className="text-lg font-bold uppercase mb-4">
               Categories Distribution
