@@ -40,7 +40,12 @@ const QuestionsSection = () => {
 }
 
 const QuestionsLoading = () => {
-  return <div>Loading questions...</div>
+  return Array.from({ length: 10 }).map((_, idx) => (
+    <div
+      key={idx}
+      className="animate-pulse bg-gray-800  h-14 mb-1 rounded-lg"
+    ></div>
+  ))
 }
 
 export default QuestionsSection
