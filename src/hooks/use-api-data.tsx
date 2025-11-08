@@ -9,6 +9,12 @@ import {
 } from 'react'
 import type { ApiResponse, Difficulty, Question } from '../types/api-types'
 
+export type Category = {
+  name: string
+  count: number
+  decodedName: string
+}
+
 const BASE_API_URL = 'https://opentdb.com'
 const NUMBER_OF_QUESTIONS = 50
 const RATE_LIMIT_INTERVAL_MS = 5000
@@ -19,7 +25,7 @@ const difficulties: (Difficulty | 'all')[] = ['all', 'easy', 'medium', 'hard']
 type OpenTriviaDBContextType = {
   apiResponse: ApiResponse | null
   filteredQuestions: Question[]
-  categories: { name: string; count: number }[]
+  categories: Category[]
   difficulties: (Difficulty | 'all')[]
   selectedCategory: string
   setSelectedCategory: React.Dispatch<React.SetStateAction<string>>
@@ -28,6 +34,7 @@ type OpenTriviaDBContextType = {
   isLoading: boolean
   updateApiData: (number_of_questions?: number) => Promise<void>
   error: string | null
+  isRateLimited: boolean
 }
 
 const OpenTriviaDBContext = createContext<OpenTriviaDBContextType | null>(null)
@@ -64,14 +71,20 @@ export const ApiDataProvider = ({
               acc.push({
                 name: question.category,
                 count: currentCategoryCount,
+                decodedName: question.category
+                  .replace(/&amp;/g, '&')
+                  .replace(/&#039;/g, "'"), // Decoding amps and quotes from categories
               })
             }
             return acc
           },
-          [{ name: 'All', count: apiResponse.results.length }] as {
-            name: string
-            count: number
-          }[]
+          [
+            {
+              name: 'All',
+              count: apiResponse.results.length,
+              decodedName: 'All',
+            },
+          ] as Category[]
         )
       : []
   }, [apiResponse])
@@ -154,6 +167,7 @@ export const ApiDataProvider = ({
         isLoading,
         updateApiData,
         error,
+        isRateLimited,
       }}
     >
       {children}

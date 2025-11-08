@@ -1,3 +1,5 @@
+import LoadDataButton from './load-data-button'
+
 const Header = () => {
   return (
     <header className="pb-18 pt-4 rounded-lg bg-gray-900 m-2">
@@ -28,6 +30,7 @@ const Header = () => {
           <p className="sm:text-lg lg:text-xl">
             Interactive visualization of data from the Open Trivia DB
           </p>
+          <LoadDataButton />
         </div>
       </div>
     </header>
