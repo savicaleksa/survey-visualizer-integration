@@ -8,6 +8,7 @@ function App() {
   return (
     <ApiDataProvider>
       <Header />
+      <CategoryList />
       <ChartsSection />
       <CategoryList />
       <QuestionsSection />
