@@ -12,6 +12,8 @@ const Header = () => {
             src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png"
             alt="JetBrains"
             className="sm:h-8 h-5 w-auto"
+            width={816}
+            height={175}
           />
         </a>
         <a
