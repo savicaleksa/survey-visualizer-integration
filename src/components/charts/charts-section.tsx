@@ -47,9 +47,10 @@ const ChartsSection = () => {
                       tick={false}
                     >
                       <RechartsPrimitive.Label
-                        value="Categories"
+                        value="CATEGORIES"
                         position="insideBottom"
                         fill="var(--color-gray-100)"
+                        offset={-2}
                       />
                     </RechartsPrimitive.XAxis>
                     <RechartsPrimitive.YAxis
@@ -60,7 +61,7 @@ const ChartsSection = () => {
                       tick={false}
                     >
                       <RechartsPrimitive.Label
-                        value="Number of Questions"
+                        value="NUMBER OF QUESTIONS"
                         angle={-90}
                         position="insideLeft"
                         fill="var(--color-gray-100)"
@@ -70,6 +71,7 @@ const ChartsSection = () => {
                       isAnimationActive={false}
                       dataKey="value"
                       activeBar={false}
+                      radius={4}
                     >
                       {categories.map((d) => (
                         <RechartsPrimitive.Cell
