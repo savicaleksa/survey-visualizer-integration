@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react'
 import type { ApiResponse, Difficulty, Question } from '../types/api-types'
+import { decodeHTML } from '../utils/decodeHTML'
 
 export type Category = {
   name: string
@@ -23,7 +24,6 @@ const RATE_LIMIT_CODE = 5
 const difficulties: Difficulty[] = ['easy', 'medium', 'hard']
 
 type OpenTriviaDBContextType = {
-  apiResponse: ApiResponse | null
   filteredQuestions: Question[]
   categories: Category[]
   categoriesWithAll: Category[]
@@ -31,8 +31,6 @@ type OpenTriviaDBContextType = {
   filteredDifficulties: { name: Difficulty; count: number; percent: number }[]
   selectedCategory: string
   setSelectedCategory: React.Dispatch<React.SetStateAction<string>>
-  selectedDifficulty: string
-  setSelectedDifficulty: React.Dispatch<React.SetStateAction<string>>
   isLoading: boolean
   updateApiData: (number_of_questions?: number) => Promise<void>
   error: string | null
@@ -58,7 +56,6 @@ export const ApiDataProvider = ({
   const [isRateLimited, setIsRateLimited] = useState(false)
   const [apiResponse, setApiReponse] = useState<ApiResponse | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const categories = useMemo(() => {
@@ -72,9 +69,7 @@ export const ApiDataProvider = ({
             acc.push({
               name: question.category,
               count: currentCategoryCount,
-              decodedName: question.category
-                .replace(/&amp;/g, '&')
-                .replace(/&#039;/g, "'"), // Decoding amps and quotes from categories
+              decodedName: decodeHTML(question.category), // Decoding amps and quotes from categories
             })
           }
           return acc
@@ -95,14 +90,11 @@ export const ApiDataProvider = ({
   const filteredQuestions = useMemo(() => {
     if (!apiResponse) return []
     return apiResponse.results.filter((question) => {
-      const categoryMatch =
+      return (
         selectedCategory === 'All' || question.category === selectedCategory
-      const difficultyMatch =
-        selectedDifficulty === 'all' ||
-        question.difficulty === selectedDifficulty
-      return categoryMatch && difficultyMatch
+      )
     })
-  }, [apiResponse, selectedCategory, selectedDifficulty])
+  }, [apiResponse, selectedCategory])
 
   const filteredDifficulties = useMemo(() => {
     const difficultyCounts: { [key in Difficulty]: number } = {
@@ -121,7 +113,7 @@ export const ApiDataProvider = ({
         (difficultyCounts[difficulty] / filteredQuestions.length) * 100
       ),
     }))
-  }, [apiResponse, selectedCategory, selectedDifficulty])
+  }, [apiResponse, selectedCategory])
 
   const rateLimit = useCallback(() => {
     setIsRateLimited(true)
@@ -135,7 +127,6 @@ export const ApiDataProvider = ({
       if (isRateLimited || !isMounted) return
       console.log('Fetching new data from API...')
       setSelectedCategory('All')
-      setSelectedDifficulty('all')
       setError(null)
       setIsLoading(true)
 
@@ -179,7 +170,6 @@ export const ApiDataProvider = ({
   return (
     <OpenTriviaDBContext.Provider
       value={{
-        apiResponse,
         filteredQuestions,
         categories,
         categoriesWithAll,
@@ -187,8 +177,7 @@ export const ApiDataProvider = ({
         filteredDifficulties,
         selectedCategory,
         setSelectedCategory,
-        selectedDifficulty,
-        setSelectedDifficulty,
+
         isLoading,
         updateApiData,
         error,
