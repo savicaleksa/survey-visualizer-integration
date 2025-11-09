@@ -24,21 +24,52 @@ const ChartsSection = () => {
             <h2 className="text-lg font-bold uppercase mb-4">
               Categories Distribution
             </h2>
-            <div className="aspect-square max-w-3xl mx-auto bg-gray-800 rounded-lg">
+            <div className="aspect-square p-4 max-w-3xl mx-auto bg-gray-800 rounded-lg">
               {!isLoading && (
                 <RechartsPrimitive.ResponsiveContainer width="100%" aspect={1}>
-                  <RechartsPrimitive.PieChart accessibilityLayer>
-                    <RechartsPrimitive.Pie
+                  <RechartsPrimitive.BarChart
+                    accessibilityLayer
+                    data={categories.map((d) => ({
+                      name: d.decodedName,
+                      value: d.count,
+                      isSelected: d.name === selectedCategory,
+                    }))}
+                  >
+                    <RechartsPrimitive.Tooltip
+                      cursor={{ fill: 'var(--color-gray-600)' }}
+                      content={CustomTooltip}
+                    />
+                    <RechartsPrimitive.XAxis
+                      tickLine={false}
+                      dataKey="name"
+                      interval={0}
+                      axisLine={false}
+                      tick={false}
+                    >
+                      <RechartsPrimitive.Label
+                        value="Categories"
+                        position="insideBottom"
+                        fill="var(--color-gray-100)"
+                      />
+                    </RechartsPrimitive.XAxis>
+                    <RechartsPrimitive.YAxis
+                      width={'auto'}
+                      tickMargin={16}
+                      tickLine={false}
+                      axisLine={false}
+                      tick={false}
+                    >
+                      <RechartsPrimitive.Label
+                        value="Number of Questions"
+                        angle={-90}
+                        position="insideLeft"
+                        fill="var(--color-gray-100)"
+                      />
+                    </RechartsPrimitive.YAxis>
+                    <RechartsPrimitive.Bar
                       isAnimationActive={false}
-                      data={categories.map((d) => ({
-                        name: d.name.toUpperCase(),
-                        value: d.count,
-                        isSelected: d.name === selectedCategory,
-                      }))}
                       dataKey="value"
-                      nameKey="name"
-                      outerRadius="80%"
-                      innerRadius="30%"
+                      activeBar={false}
                     >
                       {categories.map((d) => (
                         <RechartsPrimitive.Cell
@@ -51,11 +82,10 @@ const ChartsSection = () => {
                           }
                           className={'stroke-pink-50 stroke-2 cursor-pointer'}
                           key={d.name}
-                        />
+                        ></RechartsPrimitive.Cell>
                       ))}
-                    </RechartsPrimitive.Pie>
-                    <RechartsPrimitive.Tooltip content={CustomTooltip} />
-                  </RechartsPrimitive.PieChart>
+                    </RechartsPrimitive.Bar>
+                  </RechartsPrimitive.BarChart>
                 </RechartsPrimitive.ResponsiveContainer>
               )}
             </div>
