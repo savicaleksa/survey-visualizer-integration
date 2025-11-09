@@ -49,6 +49,7 @@ const CategoryChart = () => {
           dataKey="value"
           activeBar={false}
           radius={4}
+          label={{ position: 'top', fill: 'var(--color-gray-100)' }}
         >
           {categories.map((d) => (
             <RechartsPrimitive.Cell
