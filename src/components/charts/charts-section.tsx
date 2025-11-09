@@ -75,7 +75,13 @@ const ChartsSection = () => {
                     >
                       {categories.map((d) => (
                         <RechartsPrimitive.Cell
-                          onClick={() => setSelectedCategory(d.name)}
+                          onClick={() => {
+                            if (d.name === selectedCategory) {
+                              setSelectedCategory('All')
+                              return
+                            }
+                            setSelectedCategory(d.name)
+                          }}
                           fill={
                             d.name === selectedCategory ||
                             selectedCategory === 'All'
