@@ -1,5 +1,6 @@
 import CategoryList from './components/category-list'
 import ChartsSection from './components/charts/charts-section'
+import Footer from './components/footer'
 import Header from './components/header'
 import QuestionsSection from './components/questions'
 import { ApiDataProvider } from './hooks/use-api-data'
@@ -12,6 +13,7 @@ function App() {
       <ChartsSection />
       <CategoryList />
       <QuestionsSection />
+      <Footer />
     </ApiDataProvider>
   )
 }
