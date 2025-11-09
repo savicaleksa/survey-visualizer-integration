@@ -139,17 +139,14 @@ export const ApiDataProvider = ({
 
         const json = (await data.json()) as ApiResponse
         if (json.response_code === RATE_LIMIT_CODE) {
-          throw new Error('Rate limit exceeded')
+          throw new Error('Rate limit exceeded, please try again in 5 seconds.')
         }
         setApiReponse(json)
       } catch (error) {
-        if (error instanceof Error) {
-          setError(`Error fetching data from API: ${error.message}`)
-          console.error('Error fetching data from API:', error.message)
-        } else {
-          setError('An unknown error occurred')
-          console.error('An unknown error occurred')
-        }
+        const e = error instanceof Error ? error.message : String(error)
+        setError(e)
+        console.error(e)
+        alert(e)
       } finally {
         setIsLoading(false)
       }
@@ -177,7 +174,6 @@ export const ApiDataProvider = ({
         filteredDifficulties,
         selectedCategory,
         setSelectedCategory,
-
         isLoading,
         updateApiData,
         error,
