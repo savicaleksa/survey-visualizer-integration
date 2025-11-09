@@ -19,12 +19,44 @@ const QuestionsSection = () => {
                   {decodeHTML(q.question)}
                 </summary>
                 <div className="p-4 rounded-lg bg-gray-800">
-                  <ul className="flex pl-4 flex-col gap-2 list-disc">
-                    <li className="marker:text-green-500 font-bold">
+                  <ul className="flex pl-0 flex-col gap-2">
+                    <li className="text-green-400 flex gap-1 font-semibold">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="size-6"
+                      >
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
                       {decodeHTML(q.correct_answer)}
                     </li>
                     {q.incorrect_answers.map((ia) => (
-                      <li key={ia} className="marker:text-red-500">
+                      <li
+                        key={ia}
+                        className="text-red-300 flex gap-1 font-semibold"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="size-6"
+                        >
+                          <path d="M18 6 6 18" />
+                          <path d="m6 6 12 12" />
+                        </svg>
                         {decodeHTML(ia)}
                       </li>
                     ))}
